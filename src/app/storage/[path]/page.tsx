@@ -1,6 +1,6 @@
 import {TSearchParams} from '@/types/common.type'
 
-import hooks from '@/data/hooks.data.json'
+import storages from '@/data/storage.data.json'
 import {notFound} from 'next/navigation'
 import DetailView from '@/views/Detail/DetailView'
 
@@ -9,16 +9,16 @@ type Props = {
 	searchParams: TSearchParams
 }
 
-const HookDetailPage = async ({params}: Props) => {
+const StorageDetailPage = async ({params}: Props) => {
 	const {path} = await params
 
-	const hook = hooks.find((hook) => hook.id === path)
+	const storage = storages.find((storage) => storage.id === path)
 
-	if (!hook) {
+	if (!storage) {
 		return notFound()
 	}
 
-	return <DetailView data={hook} />
+	return <DetailView data={storage} />
 }
 
-export default HookDetailPage
+export default StorageDetailPage

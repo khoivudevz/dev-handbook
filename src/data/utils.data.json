@@ -1,0 +1,30 @@
+[
+	{
+		"id": "parse-html-to-jsx",
+		"name": "Parse HTML to JSX",
+		"path": "/util/parse-html-to-jsx",
+		"code": "import React from 'react'\nimport parse from 'html-react-parser'\nimport DOMpurify from 'dompurify'\n\nconst ParseHTML: React.FC<ParseHTMLProps> = ({htmlString, ...rest}) => {\n  return <div {...rest}>{parse(DOMpurify.sanitize(htmlString))}</div>\n}\n\nexport default ParseHTML\n\ntype ParseHTMLProps = React.HTMLAttributes<HTMLDivElement> & {\n  htmlString: string\n}",
+		"language": "tsx"
+	},
+	{
+		"id": "format-date",
+		"name": "Format Date",
+		"path": "/util/format-date",
+		"code": "import dayjs from 'dayjs'\nimport utc from 'dayjs/plugin/utc'\nimport timezone from 'dayjs/plugin/timezone'\nimport relative from 'dayjs/plugin/relativeTime'\nimport 'dayjs/locale/ko'\ndayjs.extend(utc)\ndayjs.extend(timezone)\ndayjs.extend(relative)\n\nconst formatDate = (dateString: string, format: string) => {\n    const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone\n    return dayjs.utc(dateString).tz(timeZone).format(format)\n}\n\nexport default formatDate\n\nexport const timeFromNow = (dateString: string, locate: string = 'ko') => {\n    const now = dayjs()\n    const lastTime = dayjs(dateString)\n    dayjs.locale(locate)\n    return lastTime.from(now)\n}",
+		"language": "ts"
+	},
+	{
+		"id": "cn",
+		"name": "Tailwind Merge and Clsx",
+		"path": "/util/cn",
+		"code": "import {type ClassValue, clsx} from 'clsx'\nimport {twMerge} from 'tailwind-merge'\n\nexport function cn(...inputs: ClassValue[]) {\n\treturn twMerge(clsx(inputs))\n}",
+		"language": "ts"
+	},
+	{
+		"id": "delay",
+		"name": "Delay",
+		"path": "/util/delay",
+		"code": "const delay = (ms: number): Promise<void> => {\n    return new Promise((resolve) => setTimeout(resolve, ms))\n}\n\nexport default delay",
+		"language": "ts"
+	}
+]

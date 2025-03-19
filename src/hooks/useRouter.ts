@@ -1,3 +1,5 @@
+'use client'
+
 import {useRouter as useRouterBase} from 'next/navigation'
 
 export type Router = {

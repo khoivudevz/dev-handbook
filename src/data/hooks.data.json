@@ -1,14 +1,37 @@
 [
 	{
+		"id": "use-screen-size",
 		"name": "useScreenSize",
-		"path": "use-screen-size",
+		"path": "/hook/use-screen-size",
 		"code": "import {useEffect} from 'react'\nimport {useState} from 'react'\n\nconst useScreenSize = () => {\n    const [screenSize, setScreenSize] = useState({\n        width: window.innerWidth,\n        height: window.innerHeight,\n    })\n\n    useEffect(() => {\n        const updateScreenSize = () => {\n            setScreenSize({\n                width: window.innerWidth,\n                height: window.innerHeight,\n            })\n        }\n\n        window.addEventListener('resize', updateScreenSize)\n        updateScreenSize()\n\n        return () => window.removeEventListener('resize', updateScreenSize)\n    }, [])\n\n    return screenSize\n}\n\nexport default useScreenSize",
-		"language": "tsx"
+		"language": "ts"
 	},
 	{
+		"id": "use-key-press",
 		"name": "useKeyPress ",
-		"path": "use-key-press",
+		"path": "/hook/use-key-press",
 		"code": "import {useEffect} from 'react'\n\ntype ModifierKeys = {\n    ctrl?: boolean\n    alt?: boolean\n    shift?: boolean\n}\n\nconst useKeypress = (\n    key: string,\n    action: () => void,\n    modifiers?: ModifierKeys\n) => {\n    useEffect(() => {\n        function onKeyup(e: KeyboardEvent) {\n            if (\n                e.key.toLowerCase() === key.toLowerCase() &&\n                (!modifiers?.ctrl || e.ctrlKey) &&\n                (!modifiers?.alt || e.altKey) &&\n                (!modifiers?.shift || e.shiftKey)\n            ) {\n                action()\n            }\n        }\n        window.addEventListener('keyup', onKeyup)\n        return () => window.removeEventListener('keyup', onKeyup)\n    }, [key, action, modifiers])\n}\n\nexport default useKeypress",
-		"language": "tsx"
+		"language": "ts"
+	},
+	{
+		"id": "use-copy",
+		"name": "useCopy",
+		"path": "/hook/use-copy",
+		"code": "import {useState} from 'react'\n\nconst useCopy = () => {\n    const [isCopied, setIsCopied] = useState(false)\n\n    const copyToClipboard = async (text: string) => {\n        try {\n            await navigator.clipboard.writeText(text)\n            setIsCopied(true)\n            setTimeout(() => setIsCopied(false), 2000)\n        } catch (error) {\n            console.error('Failed to copy: ', error)\n            setIsCopied(false)\n        }\n    }\n\n    return {isCopied, copyToClipboard}\n}\n\nexport default useCopy",
+		"language": "ts"
+	},
+	{
+		"id": "use-mutation",
+		"name": "useMutation",
+		"path": "/hook/use-mutation",
+		"code": "import {useState} from 'react'\n\nconst useMutation = <T extends { [key: string]: any }>() => {\n    const [data, setData] = useState<T | null>(null)\n    const [error, setError] = useState<Error | null>(null)\n    const [loading, setLoading] = useState<boolean>(false)\n\n    const mutate = async (mutateFunction: () => Promise<T>, cb?: () => void) => {\n        setLoading(true)\n        setError(null)\n\n        try {\n            const result = await mutateFunction()\n            if (!result) return\n            setData(result)\n            if (cb) {\n                cb()\n            }\n        } catch (err) {\n            setError(err as Error)\n            throw err\n        } finally {\n            setLoading(false)\n        }\n    }\n\n    return {mutate, data, error, loading}\n}\n\nexport default useMutation",
+		"language": "ts"
+	},
+	{
+		"id": "use-fetch",
+		"name": "useFetch",
+		"path": "/hook/use-fetch",
+		"code": "import {useCallback, useEffect, useReducer} from 'react'\n\ntype State<T> = {\n\tdata: T | null\n\tloading: boolean\n\terror: Error | null\n}\n\ntype Action<T> =\n\t| {type: 'FETCH_START'}\n\t| {type: 'FETCH_SUCCESS'; payload: T}\n\t| {type: 'FETCH_ERROR'; payload: Error}\n\t| {type: 'SET_LOADING'; payload: boolean}\n\nconst reducer = <T>(state: State<T>, action: Action<T>): State<T> => {\n\tswitch (action.type) {\n\t\tcase 'FETCH_START':\n\t\t\treturn {...state, loading: true, error: null}\n\t\tcase 'FETCH_SUCCESS':\n\t\t\treturn {data: action.payload, loading: false, error: null}\n\t\tcase 'FETCH_ERROR':\n\t\t\treturn {data: null, loading: false, error: action.payload}\n\t\tcase 'SET_LOADING':\n\t\t\treturn {...state, loading: action.payload}\n\t\tdefault:\n\t\t\treturn state\n\t}\n}\n\nconst useFetch = <T>(\n\tfetchFunction: () => Promise<T> | null,\n\tdependencies: ReadonlyArray<unknown> = [],\n\tsearchParams?: URLSearchParams\n) => {\n\tconst [state, dispatch] = useReducer(reducer<T>, {\n\t\tdata: null,\n\t\tloading: true,\n\t\terror: null,\n\t})\n\n\tconst fetchData = useCallback(async () => {\n\t\tdispatch({type: 'FETCH_START'})\n\t\ttry {\n\t\t\tconst response = await fetchFunction()\n\t\t\tif (!response) {\n\t\t\t\tthrow new Error('No response')\n\t\t\t}\n\t\t\tdispatch({type: 'FETCH_SUCCESS', payload: response})\n\t\t} catch (error) {\n\t\t\tdispatch({type: 'FETCH_ERROR', payload: error as Error})\n\t\t}\n\t}, [fetchFunction])\n\n\tconst refetchData = useCallback(() => {\n\t\tfetchData()\n\t}, [fetchData])\n\n\tuseEffect(() => {\n\t\tif (searchParams && !searchParams.size) {\n\t\t\tdispatch({type: 'SET_LOADING', payload: false})\n\t\t\treturn\n\t\t}\n\n\t\tfetchData()\n\t}, [...dependencies, searchParams])\n\n\treturn {\n\t\tdata: state.data,\n\t\tloading: state.loading,\n\t\terror: state.error,\n\t\trefetchData,\n\t}\n}\n\nexport default useFetch",
+		"language": "ts"
 	}
 ]

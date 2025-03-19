@@ -31,6 +31,7 @@ export const SCREEN_SIZE = {
 }
 
 export type Data = {
+	id: string
 	name: string
 	path: string
 	code: string

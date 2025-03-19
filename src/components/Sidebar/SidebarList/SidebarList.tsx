@@ -11,9 +11,9 @@ const SidebarList: FC<Props> = ({title, data}) => {
 	return (
 		<div className='space-y-[20px] mt-[50px]'>
 			<h3 className='text-lg font-bold'>{title}</h3>
-			<ul className='space-y-[16px]'>
+			<ul className='space-y-[8px]'>
 				{data.map((item) => (
-					<SidebarItem data={item} key={item.name} />
+					<SidebarItem data={item} key={item.id} />
 				))}
 			</ul>
 		</div>

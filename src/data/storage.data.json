@@ -1,0 +1,23 @@
+[
+	{
+		"id": "local-storage",
+		"name": "Local Storage",
+		"path": "/storage/local-storage",
+		"code": "export const localStorageKey = {\n    data: 'data',\n    nickname: 'nickname',\n}\n\nexport const localStorageServices = {\n    setLocalStorage: <T>(data: T, key: string) => {\n        const json = JSON.stringify(data)\n        localStorage.setItem(key, json)\n    },\n    getLocalStorage: <T>(key: string) => {\n        const json = localStorage.getItem(key)\n        if (!json) return null\n\n        try {\n            return JSON.parse(json) as T\n        } catch {\n            return null\n        }\n    },\n    removeLocalStorage: (key: string) => {\n        localStorage.removeItem(key)\n    },\n}",
+		"language": "ts"
+	},
+	{
+		"id": "session-storage",
+		"name": "Session Storage",
+		"path": "/storage/session-storage",
+		"code": "export const sessionStorageKey = {\n    data: 'data',\n    nickname: 'nickname',\n}\n\nexport const sessionStorageServices = {\n    setSessionStorage: <T>(data: T, key: string) => {\n        const json = JSON.stringify(data)\n        sessionStorage.setItem(key, json)\n    },\n    getSessionStorage: <T>(key: string) => {\n        const json = sessionStorage.getItem(key)\n        if (!json) return null\n\n        try {\n            return JSON.parse(json) as T\n        } catch {\n            return null\n        }\n    },\n    removeSessionStorage: (key: string) => {\n        sessionStorage.removeItem(key)\n    },\n}",
+		"language": "ts"
+	},
+	{
+		"id": "cookie",
+		"name": "Cookie",
+		"path": "/storage/cookie",
+		"code": "export const cookieKey = {\n    USER_INFO: 'USER_INFO',\n}\n\nexport const cookieServices = {\n    // Set a cookie\n    setCookie: <T>(\n        key: string,\n        data: T,\n        options?: {days?: number; path?: string}\n    ) => {\n        const json = JSON.stringify(data)\n        let cookieString = `${key}=${json};`\n\n        // Set expiration days\n        if (options?.days) {\n            const date = new Date()\n            date.setTime(date.getTime() + options.days * 24 * 60 * 60 * 1000)\n            cookieString += `expires=${date.toUTCString()};`\n        }\n\n        // Set path\n        if (options?.path) {\n            cookieString += `path=${options.path};`\n        } else {\n            cookieString += `path=/;` // Default path is root\n        }\n\n        document.cookie = cookieString\n    },\n\n    // Get a cookie\n    getCookie: <T>(key: string) => {\n        const cookieArray = document.cookie.split('; ')\n        for (const cookie of cookieArray) {\n            const [cookieKey, cookieValue] = cookie.split('=')\n            if (cookieKey === key) {\n                const json = JSON.parse(cookieValue)\n\n                if (json !== undefined) {\n                    return json as T\n                }\n                return null\n            }\n        }\n        return null\n    },\n\n    // Remove a cookie\n    removeCookie: (key: string, options?: {path?: string}) => {\n        cookieServices.setCookie(key, '', {\n            days: -1, // Set expiration to past date\n            path: options?.path || '/', // Ensure path matches when removing\n        })\n    },\n}",
+		"language": "ts"
+	}
+]
