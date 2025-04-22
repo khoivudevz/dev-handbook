@@ -33,5 +33,12 @@
 		"path": "/hook/use-fetch",
 		"code": "import {useCallback, useEffect, useReducer} from 'react'\n\ntype State<T> = {\n\tdata: T | null\n\tloading: boolean\n\terror: Error | null\n}\n\ntype Action<T> =\n\t| {type: 'FETCH_START'}\n\t| {type: 'FETCH_SUCCESS'; payload: T}\n\t| {type: 'FETCH_ERROR'; payload: Error}\n\t| {type: 'SET_LOADING'; payload: boolean}\n\nconst reducer = <T>(state: State<T>, action: Action<T>): State<T> => {\n\tswitch (action.type) {\n\t\tcase 'FETCH_START':\n\t\t\treturn {...state, loading: true, error: null}\n\t\tcase 'FETCH_SUCCESS':\n\t\t\treturn {data: action.payload, loading: false, error: null}\n\t\tcase 'FETCH_ERROR':\n\t\t\treturn {data: null, loading: false, error: action.payload}\n\t\tcase 'SET_LOADING':\n\t\t\treturn {...state, loading: action.payload}\n\t\tdefault:\n\t\t\treturn state\n\t}\n}\n\nconst useFetch = <T>(\n\tfetchFunction: () => Promise<T> | null,\n\tdependencies: ReadonlyArray<unknown> = [],\n\tsearchParams?: URLSearchParams\n) => {\n\tconst [state, dispatch] = useReducer(reducer<T>, {\n\t\tdata: null,\n\t\tloading: true,\n\t\terror: null,\n\t})\n\n\tconst fetchData = useCallback(async () => {\n\t\tdispatch({type: 'FETCH_START'})\n\t\ttry {\n\t\t\tconst response = await fetchFunction()\n\t\t\tif (!response) {\n\t\t\t\tthrow new Error('No response')\n\t\t\t}\n\t\t\tdispatch({type: 'FETCH_SUCCESS', payload: response})\n\t\t} catch (error) {\n\t\t\tdispatch({type: 'FETCH_ERROR', payload: error as Error})\n\t\t}\n\t}, [fetchFunction])\n\n\tconst refetchData = useCallback(() => {\n\t\tfetchData()\n\t}, [fetchData])\n\n\tuseEffect(() => {\n\t\tif (searchParams && !searchParams.size) {\n\t\t\tdispatch({type: 'SET_LOADING', payload: false})\n\t\t\treturn\n\t\t}\n\n\t\tfetchData()\n\t}, [...dependencies, searchParams])\n\n\treturn {\n\t\tdata: state.data,\n\t\tloading: state.loading,\n\t\terror: state.error,\n\t\trefetchData,\n\t}\n}\n\nexport default useFetch",
 		"language": "ts"
+	},
+	{
+		"id": "use-pagination",
+		"name": "usePagination",
+		"path": "/hook/use-pagination",
+		"code": "import {useState} from 'react'\n\nconst usePagination = (defaultPage = 1, defaultPageSize = 10) => {\n    const [page, setPage] = useState<number>(defaultPage)\n    const [pageSize, setPageSize] = useState<number>(defaultPageSize)\n\n    return {\n        page,\n        setPage,\n        pageSize,\n        setPageSize,\n    }\n}\n\nexport default usePagination",
+		"language": "ts"
 	}
 ]
