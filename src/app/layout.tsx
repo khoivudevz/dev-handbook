@@ -16,8 +16,8 @@ const firaCode = Fira_Code({
 })
 
 export const metadata: Metadata = {
-	title: 'Turbo Setup NextJS - TS - TailwindCSS',
-	description: 'Turbo Setup NextJS - TS - TailwindCSS',
+	title: 'Dev Handhook',
+	description: 'React hooks, utils, storage and more',
 }
 
 export default async function RootLayout({
