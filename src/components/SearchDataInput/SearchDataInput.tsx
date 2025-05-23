@@ -1,6 +1,6 @@
 'use client'
 
-import {useState, useMemo} from 'react'
+import {useState, useMemo, useRef, useEffect} from 'react'
 import {useRouter} from 'next/navigation'
 import {Input} from '@/components/ui/input'
 import hooksData from '@/data/hooks.data.json'
@@ -12,6 +12,8 @@ const allData = [...hooksData, ...utilsData, ...storageData]
 const SearchDataInput = () => {
 	const [search, setSearch] = useState('')
 	const router = useRouter()
+	const inputRef = useRef<HTMLInputElement>(null)
+	const dropdownRef = useRef<HTMLDivElement>(null)
 
 	const results = useMemo(() => {
 		if (!search.trim()) return []
@@ -23,16 +25,38 @@ const SearchDataInput = () => {
 		)
 	}, [search])
 
+	useEffect(() => {
+		if (!search) return
+		const handleClick = (e: MouseEvent) => {
+			const input = inputRef.current
+			const dropdown = dropdownRef.current
+			if (
+				input &&
+				!input.contains(e.target as Node) &&
+				dropdown &&
+				!dropdown.contains(e.target as Node)
+			) {
+				setSearch('')
+			}
+		}
+		document.addEventListener('mousedown', handleClick)
+		return () => document.removeEventListener('mousedown', handleClick)
+	}, [search])
+
 	return (
 		<div className='relative w-full max-w-md flex flex-col gap-4 items-center mx-auto'>
 			<Input
+				ref={inputRef}
 				placeholder='Search for a snippet, hook, or topic...'
 				className='bg-background border-border text-foreground'
 				value={search}
 				onChange={(e) => setSearch(e.target.value)}
 			/>
 			{search && (
-				<div className='w-full bg-card border border-border rounded-md shadow mt-2 max-h-60 overflow-auto z-10 absolute top-full'>
+				<div
+					ref={dropdownRef}
+					className='w-full bg-card border border-border rounded-md shadow mt-2 max-h-60 overflow-auto z-10 absolute top-full'
+				>
 					{results.length > 0 ? (
 						results.map((item) => (
 							<div

@@ -17,7 +17,7 @@ const firaCode = Fira_Code({
 })
 
 export const metadata: Metadata = {
-	title: 'Dev Handhook',
+	title: 'Dev Playbook',
 	description: 'React hooks, utils, storage and more',
 }
 
@@ -44,8 +44,8 @@ export default async function RootLayout({
 								<main className='relative container mx-auto desktop:flex'>
 									<Sidebar />
 									<Header />
-									<div className=' relative mt-[61px] desktop:mt-0 desktop:pt-[80px] w-full desktop:w-[70%] py-[10px] px-[10px] tablet:px-[30px] h-dvh desktop:border-x border-neutral-700 border-dashed overflow-y-auto'>
-										<div className='absolute top-[20px] left-1/2 -translate-x-1/2 w-full h-full'>
+									<div className='relative mt-[61px] desktop:mt-0 desktop:pt-[80px] w-full desktop:w-[70%] py-[10px] px-[10px] tablet:px-[30px] h-dvh desktop:border-x border-neutral-700 border-dashed overflow-y-auto'>
+										<div className='desktop:block hidden absolute top-[20px] left-1/2 -translate-x-1/2 w-full h-full '>
 											<SearchDataInput />
 										</div>
 										{children}

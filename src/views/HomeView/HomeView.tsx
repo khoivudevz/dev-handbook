@@ -9,7 +9,7 @@ const HomeView = () => {
 				className='text-3xl md:text-5xl font-extrabold text-center'
 				style={{color: 'var(--primary)'}}
 			>
-				Welcome to Dev Handbook
+				Welcome to Dev Playbook
 			</h1>
 			<p className='max-w-xl text-center text-lg md:text-xl text-muted-foreground'>
 				Your ultimate resource for code snippets, hooks, and best practices.
