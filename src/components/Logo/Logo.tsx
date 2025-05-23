@@ -11,7 +11,7 @@ const LogoContent = ({size = 34}: {size?: number}) => (
 		<NotebookPen size={size} />
 		<div className='text-sm desktop:text-lg font-bold'>
 			<p>Dev</p>
-			<p>Handbook</p>
+			<p>Playbook</p>
 		</div>
 	</div>
 )

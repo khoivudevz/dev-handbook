@@ -13,7 +13,7 @@ type Props = {
 const CodeBlock: FC<Props> = ({data, lang = 'js'}) => {
 	const {isCopied, copyToClipboard} = useCopy()
 	return (
-		<div className='relative'>
+		<div className='relative z-[-1px]'>
 			<CodeEditor
 				value={data}
 				language={lang}
@@ -23,6 +23,7 @@ const CodeBlock: FC<Props> = ({data, lang = 'js'}) => {
 					borderRadius: '10px',
 					border: '1px dashed #404040',
 					backgroundColor: '#171717',
+					zIndex: -1,
 					fontFamily:
 						'Fira Code, ui-monospace, SFMono-Regular, SF Mono, Consolas, Liberation Mono, Menlo, monospace',
 				}}
