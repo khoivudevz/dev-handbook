@@ -1,5 +1,4 @@
 import Logo from '@/components/Logo/Logo'
-import HomeSearchClient from './HomeSearchClient'
 
 const HomeView = () => {
 	return (
@@ -15,7 +14,6 @@ const HomeView = () => {
 				Your ultimate resource for code snippets, hooks, and best practices.
 				Search, learn, and boost your productivity.
 			</p>
-			<HomeSearchClient />
 		</section>
 	)
 }

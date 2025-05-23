@@ -61,7 +61,10 @@ const SearchDataInput = () => {
 						results.map((item) => (
 							<div
 								key={item.id}
-								onClick={() => router.push(item.path)}
+								onClick={() => {
+									router.push(item.path)
+									setSearch('')
+								}}
 								className='px-4 py-2 hover:bg-accent cursor-pointer border-b last:border-b-0 border-border'
 							>
 								<div className='font-semibold text-primary'>{item.name}</div>
