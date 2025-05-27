@@ -36,4 +36,6 @@ export type Data = {
 	path: string
 	code: string
 	language: string
+	subTitle?: string
+	sub?: string
 }

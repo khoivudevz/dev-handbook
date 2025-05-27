@@ -40,5 +40,21 @@
 		"path": "/hook/use-pagination",
 		"code": "import {useState} from 'react'\n\nconst usePagination = (defaultPage = 1, defaultPageSize = 10) => {\n    const [page, setPage] = useState<number>(defaultPage)\n    const [pageSize, setPageSize] = useState<number>(defaultPageSize)\n\n    return {\n        page,\n        setPage,\n        pageSize,\n        setPageSize,\n    }\n}\n\nexport default usePagination",
 		"language": "ts"
+	},
+	{
+		"id": "use-modal",
+		"name": "useModal",
+		"path": "/hook/use-modal",
+		"code": "import useModalStore from '@/app/store/useModal.store'\n\nconst useModal = <T>(modalName: string) => {\n    const {openModal, closeModal, modals} = useModalStore()\n\n    const isOpen = modals[modalName]?.isOpen\n    const payload = modals[modalName]?.payload as T | undefined\n\n    const handleOpenModal = (payload?: T) => {\n        openModal(modalName, payload)\n    }\n\n    const handleCloseModal = (callback?: () => void) => {\n        closeModal(modalName)\n        callback?.()\n    }\n\n    const handleConfirm = (callback?: () => void) => {\n        if (!callback) return\n        callback()\n    }\n\n    return {\n        isOpen,\n        payload,\n        handleOpenModal,\n        handleCloseModal,\n        handleConfirm,\n    }\n}\n\nexport default useModal",
+		"subTitle": "useModalStore",
+		"sub": "import {create} from 'zustand'\nimport {devtools} from 'zustand/middleware'\n\nexport type ModalKey = string\n\nexport type ModalState = {\n\tisOpen: boolean\n\tpayload?: unknown\n}\n\nexport type ModalsStore = {\n\tmodals: Record<ModalKey, ModalState>\n\topenModal: (key: ModalKey, payload?: unknown) => void\n\tcloseModal: (key: ModalKey) => void\n\ttoggleModal: (key: ModalKey, payload?: unknown) => void\n}\n\nconst useModalStore = create<ModalsStore>()(\n\tdevtools(\n\t\t(set, get) => ({\n\t\t\tmodals: {},\n\t\t\topenModal: (key, payload) =>\n\t\t\t\tset((state) => ({\n\t\t\t\t\tmodals: {\n\t\t\t\t\t\t...state.modals,\n\t\t\t\t\t\t[key]: {isOpen: true, payload},\n\t\t\t\t\t},\n\t\t\t\t})),\n\t\t\tcloseModal: (key) =>\n\t\t\t\tset((state) => ({\n\t\t\t\t\tmodals: {\n\t\t\t\t\t\t...state.modals,\n\t\t\t\t\t\t[key]: {isOpen: false},\n\t\t\t\t\t},\n\t\t\t\t})),\n\t\t\ttoggleModal: (key, payload) => {\n\t\t\t\tconst current = get().modals[key]?.isOpen\n\t\t\t\tset((state) => ({\n\t\t\t\t\tmodals: {\n\t\t\t\t\t\t...state.modals,\n\t\t\t\t\t\t[key]: {isOpen: !current, payload},\n\t\t\t\t\t},\n\t\t\t\t}))\n\t\t\t},\n\t\t}),\n\t\t{name: 'useModalStore'}\n\t)\n)\n\nexport default useModalStore",
+		"language": "ts"
+	},
+	{
+		"id": "use-ref-state",
+		"name": "useRefState",
+		"path": "/hook/use-ref-state",
+		"code": "import {useEffect, useRef, useState} from 'react'\n\nconst useRefState = <T>(initialValue: T) => {\n    const [state, setState] = useState<T>(initialValue)\n\n    const ref = useRef<T>(initialValue)\n\n    useEffect(() => {\n        ref.current = state\n    }, [state])\n\n    return {state, setState, ref}\n}\n\nexport default useRefState",
+		"language": "ts"
 	}
 ]
