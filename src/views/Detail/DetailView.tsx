@@ -10,10 +10,18 @@ type Props = {
 
 const DetailView = ({data}: Props) => {
 	return (
-		<div className='space-y-[20px]'>
-			<Title title={data.name} />
+		<div className='space-y-[60px]'>
+			<div className='space-y-[20px]'>
+				<Title title={data.name} />
+				<CodeBlock data={data.code} />
+			</div>
 
-			<CodeBlock data={data.code} />
+			<div>
+				{data.subTitle && (
+					<div className='text-sm text-gray-500 mb-[20px]'>{data.subTitle}</div>
+				)}
+				{data.sub && <CodeBlock data={data.sub} />}
+			</div>
 		</div>
 	)
 }
