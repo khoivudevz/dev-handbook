@@ -38,4 +38,5 @@ export type Data = {
 	language: string
 	subTitle?: string
 	sub?: string
+	example?: string
 }
