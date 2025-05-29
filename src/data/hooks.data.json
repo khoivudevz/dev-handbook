@@ -4,42 +4,48 @@
 		"name": "useScreenSize",
 		"path": "/hook/use-screen-size",
 		"code": "import {useEffect} from 'react'\nimport {useState} from 'react'\n\nconst useScreenSize = () => {\n    const [screenSize, setScreenSize] = useState({\n        width: window.innerWidth,\n        height: window.innerHeight,\n    })\n\n    useEffect(() => {\n        const updateScreenSize = () => {\n            setScreenSize({\n                width: window.innerWidth,\n                height: window.innerHeight,\n            })\n        }\n\n        window.addEventListener('resize', updateScreenSize)\n        updateScreenSize()\n\n        return () => window.removeEventListener('resize', updateScreenSize)\n    }, [])\n\n    return screenSize\n}\n\nexport default useScreenSize",
-		"language": "ts"
+		"language": "ts",
+		"example": "import useScreenSize from '@/app/hook/use-screen-size'\n\nconst MyComponent = () => {\n  const { width, height } = useScreenSize()\n  return <div>Width: {width}, Height: {height}</div>\n}"
 	},
 	{
 		"id": "use-key-press",
 		"name": "useKeyPress ",
 		"path": "/hook/use-key-press",
 		"code": "import {useEffect} from 'react'\n\ntype ModifierKeys = {\n    ctrl?: boolean\n    alt?: boolean\n    shift?: boolean\n}\n\nconst useKeypress = (\n    key: string,\n    action: () => void,\n    modifiers?: ModifierKeys\n) => {\n    useEffect(() => {\n        function onKeyup(e: KeyboardEvent) {\n            if (\n                e.key.toLowerCase() === key.toLowerCase() &&\n                (!modifiers?.ctrl || e.ctrlKey) &&\n                (!modifiers?.alt || e.altKey) &&\n                (!modifiers?.shift || e.shiftKey)\n            ) {\n                action()\n            }\n        }\n        window.addEventListener('keyup', onKeyup)\n        return () => window.removeEventListener('keyup', onKeyup)\n    }, [key, action, modifiers])\n}\n\nexport default useKeypress",
-		"language": "ts"
+		"language": "ts",
+		"example": "import useKeypress from '@/app/hook/use-key-press'\n\nconst MyComponent = () => {\n  useKeypress('Enter', () => alert('Enter pressed!'), { ctrl: true })\n  return <div>Press Ctrl+Enter</div>\n}"
 	},
 	{
 		"id": "use-copy",
 		"name": "useCopy",
 		"path": "/hook/use-copy",
 		"code": "import {useState} from 'react'\n\nconst useCopy = () => {\n    const [isCopied, setIsCopied] = useState(false)\n\n    const copyToClipboard = async (text: string) => {\n        try {\n            await navigator.clipboard.writeText(text)\n            setIsCopied(true)\n            setTimeout(() => setIsCopied(false), 2000)\n        } catch (error) {\n            console.error('Failed to copy: ', error)\n            setIsCopied(false)\n        }\n    }\n\n    return {isCopied, copyToClipboard}\n}\n\nexport default useCopy",
-		"language": "ts"
+		"language": "ts",
+		"example": "import useCopy from '@/app/hook/use-copy'\n\nconst MyComponent = () => {\n  const { isCopied, copyToClipboard } = useCopy()\n  return (\n    <div>\n      <button onClick={() => copyToClipboard('Hello!')}>Copy</button>\n      {isCopied && <span>Copied!</span>}\n    </div>\n  )\n}"
 	},
 	{
 		"id": "use-mutation",
 		"name": "useMutation",
 		"path": "/hook/use-mutation",
 		"code": "import {useState} from 'react'\n\nconst useMutation = <T extends { [key: string]: any }>() => {\n    const [data, setData] = useState<T | null>(null)\n    const [error, setError] = useState<Error | null>(null)\n    const [loading, setLoading] = useState<boolean>(false)\n\n    const mutate = async (mutateFunction: () => Promise<T>, cb?: () => void) => {\n        setLoading(true)\n        setError(null)\n\n        try {\n            const result = await mutateFunction()\n            if (!result) return\n            setData(result)\n            if (cb) {\n                cb()\n            }\n        } catch (err) {\n            setError(err as Error)\n            throw err\n        } finally {\n            setLoading(false)\n        }\n    }\n\n    return {mutate, data, error, loading}\n}\n\nexport default useMutation",
-		"language": "ts"
+		"language": "ts",
+		"example": "import useMutation from '@/app/hook/use-mutation'\n\nconst MyComponent = () => {\n  const { mutate, data, error, loading } = useMutation()\n\n  const handleSave = () => {\n    mutate(() => Promise.resolve({ success: true }))\n  }\n\n  return (\n    <div>\n      <button onClick={handleSave} disabled={loading}>Save</button>\n      {data && <span>Saved!</span>}\n      {error && <span>Error!</span>}\n    </div>\n  )\n}"
 	},
 	{
 		"id": "use-fetch",
 		"name": "useFetch",
 		"path": "/hook/use-fetch",
-		"code": "import {useCallback, useEffect, useReducer} from 'react'\n\ntype State<T> = {\n\tdata: T | null\n\tloading: boolean\n\terror: Error | null\n}\n\ntype Action<T> =\n\t| {type: 'FETCH_START'}\n\t| {type: 'FETCH_SUCCESS'; payload: T}\n\t| {type: 'FETCH_ERROR'; payload: Error}\n\t| {type: 'SET_LOADING'; payload: boolean}\n\nconst reducer = <T>(state: State<T>, action: Action<T>): State<T> => {\n\tswitch (action.type) {\n\t\tcase 'FETCH_START':\n\t\t\treturn {...state, loading: true, error: null}\n\t\tcase 'FETCH_SUCCESS':\n\t\t\treturn {data: action.payload, loading: false, error: null}\n\t\tcase 'FETCH_ERROR':\n\t\t\treturn {data: null, loading: false, error: action.payload}\n\t\tcase 'SET_LOADING':\n\t\t\treturn {...state, loading: action.payload}\n\t\tdefault:\n\t\t\treturn state\n\t}\n}\n\nconst useFetch = <T>(\n\tfetchFunction: () => Promise<T> | null,\n\tdependencies: ReadonlyArray<unknown> = [],\n\tsearchParams?: URLSearchParams\n) => {\n\tconst [state, dispatch] = useReducer(reducer<T>, {\n\t\tdata: null,\n\t\tloading: true,\n\t\terror: null,\n\t})\n\n\tconst fetchData = useCallback(async () => {\n\t\tdispatch({type: 'FETCH_START'})\n\t\ttry {\n\t\t\tconst response = await fetchFunction()\n\t\t\tif (!response) {\n\t\t\t\tthrow new Error('No response')\n\t\t\t}\n\t\t\tdispatch({type: 'FETCH_SUCCESS', payload: response})\n\t\t} catch (error) {\n\t\t\tdispatch({type: 'FETCH_ERROR', payload: error as Error})\n\t\t}\n\t}, [fetchFunction])\n\n\tconst refetchData = useCallback(() => {\n\t\tfetchData()\n\t}, [fetchData])\n\n\tuseEffect(() => {\n\t\tif (searchParams && !searchParams.size) {\n\t\t\tdispatch({type: 'SET_LOADING', payload: false})\n\t\t\treturn\n\t\t}\n\n\t\tfetchData()\n\t}, [...dependencies, searchParams])\n\n\treturn {\n\t\tdata: state.data,\n\t\tloading: state.loading,\n\t\terror: state.error,\n\t\trefetchData,\n\t}\n}\n\nexport default useFetch",
-		"language": "ts"
+		"code": "import {useState, useEffect} from 'react'\nimport {AxiosResponse} from 'axios'\n\nconst useFetch = <T>(fetchFunction: () => Promise<AxiosResponse<T>> | null, dependencies: ReadonlyArray<unknown> = [], searchParams?: URLSearchParams) => {\n    const [data, setData] = useState<T | null>(null)\n    const [loading, setLoading] = useState<boolean>(true)\n    const [error, setError] = useState<Error | null>(null)\n    const [refetch, setRefetch] = useState<boolean>(false)\n    const [status, setStatus] = useState<number | null>(null)\n\n    const refetchData = () => {\n        setRefetch(!refetch)\n    }\n\n    useEffect(() => {\n        if (data !== null || error !== null) {\n            setLoading(false)\n        }\n    }, [data, error])\n\n    useEffect(() => {\n        const fetchData = async () => {\n            setLoading(true)\n            try {\n                const response = await fetchFunction()\n                if (!response) {\n                    setError(new Error('No response'))\n                    return\n                }\n                setData(response.data as T)\n                setStatus(response.status)\n                setError(null)\n            } catch (error) {\n                setError(error as Error)\n                setData(null)\n            }\n        }\n        fetchData()\n    }, [fetchFunction, ...dependencies, refetch])\n\n    return {\n        data,\n        loading,\n        error,\n        refetch: refetchData,\n        status,\n    }\n}\n\nexport default useFetch",
+		"language": "ts",
+		"example": "import axios from 'axios'\n\nconst fetchData = async () => {\n    const response = await axios.get('https://api.example.com/data')\n    return response\n}\n\nconst {data, loading, error, refetch, status} = useFetch(fetchData)\n\nconsole.log(data, loading, error, refetch, status)"
 	},
 	{
 		"id": "use-pagination",
 		"name": "usePagination",
 		"path": "/hook/use-pagination",
 		"code": "import {useState} from 'react'\n\nconst usePagination = (defaultPage = 1, defaultPageSize = 10) => {\n    const [page, setPage] = useState<number>(defaultPage)\n    const [pageSize, setPageSize] = useState<number>(defaultPageSize)\n\n    return {\n        page,\n        setPage,\n        pageSize,\n        setPageSize,\n    }\n}\n\nexport default usePagination",
-		"language": "ts"
+		"language": "ts",
+		"example": "import usePagination from '@/app/hook/use-pagination'\n\nconst MyComponent = () => {\n  const { page, setPage, pageSize, setPageSize } = usePagination()\n  return (\n    <div>\n      <button onClick={() => setPage(page - 1)} disabled={page === 1}>Prev</button>\n      <span>Page: {page}</span>\n      <button onClick={() => setPage(page + 1)}>Next</button>\n      <select value={pageSize} onChange={e => setPageSize(Number(e.target.value))}>\n        <option value={5}>5</option>\n        <option value={10}>10</option>\n      </select>\n    </div>\n  )\n}"
 	},
 	{
 		"id": "use-modal",
@@ -48,13 +54,15 @@
 		"code": "import useModalStore from '@/app/store/useModal.store'\n\nconst useModal = <T>(modalName: string) => {\n    const {openModal, closeModal, modals} = useModalStore()\n\n    const isOpen = modals[modalName]?.isOpen\n    const payload = modals[modalName]?.payload as T | undefined\n\n    const handleOpenModal = (payload?: T) => {\n        openModal(modalName, payload)\n    }\n\n    const handleCloseModal = (callback?: () => void) => {\n        closeModal(modalName)\n        callback?.()\n    }\n\n    const handleConfirm = (callback?: () => void) => {\n        if (!callback) return\n        callback()\n    }\n\n    return {\n        isOpen,\n        payload,\n        handleOpenModal,\n        handleCloseModal,\n        handleConfirm,\n    }\n}\n\nexport default useModal",
 		"subTitle": "useModalStore",
 		"sub": "import {create} from 'zustand'\nimport {devtools} from 'zustand/middleware'\n\nexport type ModalKey = string\n\nexport type ModalState = {\n\tisOpen: boolean\n\tpayload?: unknown\n}\n\nexport type ModalsStore = {\n\tmodals: Record<ModalKey, ModalState>\n\topenModal: (key: ModalKey, payload?: unknown) => void\n\tcloseModal: (key: ModalKey) => void\n\ttoggleModal: (key: ModalKey, payload?: unknown) => void\n}\n\nconst useModalStore = create<ModalsStore>()(\n\tdevtools(\n\t\t(set, get) => ({\n\t\t\tmodals: {},\n\t\t\topenModal: (key, payload) =>\n\t\t\t\tset((state) => ({\n\t\t\t\t\tmodals: {\n\t\t\t\t\t\t...state.modals,\n\t\t\t\t\t\t[key]: {isOpen: true, payload},\n\t\t\t\t\t},\n\t\t\t\t})),\n\t\t\tcloseModal: (key) =>\n\t\t\t\tset((state) => ({\n\t\t\t\t\tmodals: {\n\t\t\t\t\t\t...state.modals,\n\t\t\t\t\t\t[key]: {isOpen: false},\n\t\t\t\t\t},\n\t\t\t\t})),\n\t\t\ttoggleModal: (key, payload) => {\n\t\t\t\tconst current = get().modals[key]?.isOpen\n\t\t\t\tset((state) => ({\n\t\t\t\t\tmodals: {\n\t\t\t\t\t\t...state.modals,\n\t\t\t\t\t\t[key]: {isOpen: !current, payload},\n\t\t\t\t\t},\n\t\t\t\t}))\n\t\t\t},\n\t\t}),\n\t\t{name: 'useModalStore'}\n\t)\n)\n\nexport default useModalStore",
-		"language": "ts"
+		"language": "ts",
+		"example": "import useModal from '@/app/hook/use-modal'\n\nconst { handleOpenModal, handleCloseModal, isOpen, payload, handleConfirm } = useModal<{ message?: string; data?: { name: string } }>('myModal')\n\n// DemoModal component\nconst DemoModal = ({ isOpen, handleCloseModal, handleConfirm, payload }) => (\n  <Modal visible={isOpen} onClose={handleCloseModal} title='Welcome!'>\n    <div>\n      <p>{payload?.message || 'This is the modal!'}</p>\n      <div>\n        {/* Content here, e.g. API list, loading, etc. */}\n      </div>\n      <div>\n        <button onClick={handleCloseModal}>Cancel</button>\n        <button\n          onClick={() => {\n            handleConfirm(() => {\n              alert(payload?.data?.name)\n            })\n          }}\n        >\n          Confirm\n        </button>\n      </div>\n    </div>\n  </Modal>\n)\n\n// Usage\nreturn (\n  <>\n    <button\n      onClick={() =>\n        handleOpenModal({\n          message: 'Hello',\n          data: { name: 'Test Modal Data' },\n        })\n      }\n    >\n      Open Modal\n    </button>\n    <DemoModal\n      isOpen={isOpen}\n      handleCloseModal={handleCloseModal}\n      handleConfirm={handleConfirm}\n      payload={payload}\n    />\n  </>\n)"
 	},
 	{
 		"id": "use-ref-state",
 		"name": "useRefState",
 		"path": "/hook/use-ref-state",
-		"code": "import {useEffect, useRef, useState} from 'react'\n\nconst useRefState = <T>(initialValue: T) => {\n    const [state, setState] = useState<T>(initialValue)\n\n    const ref = useRef<T>(initialValue)\n\n    useEffect(() => {\n        ref.current = state\n    }, [state])\n\n    return {state, setState, ref}\n}\n\nexport default useRefState",
-		"language": "ts"
+		"code": "import isEqual from 'lodash/isEqual'\nimport {useEffect, useRef, useState} from 'react'\n\nconst useRefState = <T>(initialValue: T) => {\n    const [state, setState] = useState<T>(initialValue)\n    const ref = useRef<T>(initialValue)\n\n    useEffect(() => {\n        ref.current = state\n    }, [state])\n\n    useEffect(() => {\n        if (!isEqual(ref.current, initialValue)) {\n            setState(initialValue)\n        }\n    }, [initialValue])\n\n    return {state, setState, ref}\n}\n\nexport default useRefState",
+		"language": "ts",
+		"example": "import useRefState from '@/app/hook/use-ref-state'\n\nconst MyComponent = () => {\n  const { state, setState, ref } = useRefState(0)\n  return (\n    <div>\n      <span>Value: {state}</span>\n      <button onClick={() => setState(state + 1)}>Increment</button>\n      <span>Ref value: {ref.current}</span>\n    </div>\n  )\n}"
 	}
 ]

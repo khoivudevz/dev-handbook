@@ -22,6 +22,15 @@ const DetailView = ({data}: Props) => {
 				)}
 				{data.sub && <CodeBlock data={data.sub} />}
 			</div>
+
+			<div>
+				{data.example && (
+					<>
+						<div className='text-sm text-gray-500 mb-[20px]'>Example</div>
+						<CodeBlock data={data.example} />
+					</>
+				)}
+			</div>
 		</div>
 	)
 }
